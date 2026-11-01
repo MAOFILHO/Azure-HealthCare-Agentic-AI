@@ -1,0 +1,16 @@
+# QA v2 issue 5 @ c9747a9 (rebased on staging f7003bc)
+$ az bicep build --file infra/main.bicep
+exit=0
+$ az bicep build --file infra/roles.bicep
+exit=0
+$ az bicep build --file infra/foundry.bicep
+exit=0
+$ az bicep build --file infra/models.bicep
+exit=0
+$ python3 -m unittest tests.test_infra_roles tests.test_infra_bicep
+----------------------------------------------------------------------
+Ran 15 tests in 8.646s
+
+OK
+note: lab02-06 test modules fail to import here (azure SDK not installed in this python); files untouched by this PR
+pr-security-review: 0 findings (Bicep role assignments scoped to Foundry resource, principalId has no default, no secrets)
