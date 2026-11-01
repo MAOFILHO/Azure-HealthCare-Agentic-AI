@@ -95,6 +95,9 @@
       "Bash(gh pr edit:*)",
       "Bash(bash .claude/bin/super-board-stop.sh:*)",
       "Bash(bash .claude/bin/super-board-env-check.sh:*)"
+    ],
+    "deny": [
+      "Bash(gh pr merge:*)"
     ]
   }
 }
