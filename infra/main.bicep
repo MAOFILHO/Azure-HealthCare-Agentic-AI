@@ -12,6 +12,9 @@ param projectName string = 'K21-healthcare'
 @description('Azure region.')
 param location string = 'eastus2'
 
+@description('Object id of the user or service principal that runs the labs (az ad signed-in-user show --query id).')
+param principalId string
+
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
   location: location
@@ -25,6 +28,18 @@ module foundry 'foundry.bicep' = {
     projectName: projectName
     location: location
   }
+}
+
+module roles 'roles.bicep' = {
+  name: 'roles'
+  scope: rg
+  params: {
+    foundryName: foundryName
+    principalId: principalId
+  }
+  dependsOn: [
+    foundry
+  ]
 }
 
 module models 'models.bicep' = {
