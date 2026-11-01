@@ -69,3 +69,25 @@ def test_cleanup_deletes_nothing_when_only_foreign_resources_exist():
 
     project.agents.delete.assert_not_called()
     openai_client.vector_stores.delete.assert_not_called()
+
+
+def test_cleanup_prints_the_group_name_that_destroy_sh_deletes(monkeypatch, capsys):
+    import lab07_cleanup
+
+    destroy = (Path(__file__).resolve().parent.parent / "infra" / "destroy.sh").read_text()
+    group = next(
+        line.split("=", 1)[1].strip('"')
+        for line in destroy.splitlines()
+        if line.startswith("group=")
+    )
+    monkeypatch.setenv("FOUNDRY_PROJECT_ENDPOINT", "https://example.test")
+    monkeypatch.setattr(lab07_cleanup, "load_dotenv", lambda: None)
+    monkeypatch.setattr(lab07_cleanup, "DefaultAzureCredential", MagicMock())
+    project = MagicMock()
+    project.agents.list.return_value = []
+    project.get_openai_client.return_value.vector_stores.list.return_value = []
+    monkeypatch.setattr(lab07_cleanup, "AIProjectClient", MagicMock(return_value=project))
+
+    lab07_cleanup.main()
+
+    assert f"--name {group} " in capsys.readouterr().out

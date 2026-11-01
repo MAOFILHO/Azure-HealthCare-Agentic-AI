@@ -32,7 +32,7 @@ def main():
     )
     cleanup(project, project.get_openai_client())
     print("Lab agents and vector stores cleared. To remove everything else, run:")
-    print("  az group delete --name rg-northfield-ai --yes")
+    print("  az group delete --name K21-project-rg --yes")
 
 
 if __name__ == "__main__":
