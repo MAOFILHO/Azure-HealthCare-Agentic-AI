@@ -91,3 +91,31 @@ def test_cleanup_prints_the_group_name_that_destroy_sh_deletes(monkeypatch, caps
     lab07_cleanup.main()
 
     assert f"--name {group} " in capsys.readouterr().out
+
+
+def test_cleanup_reads_every_list_to_the_end_before_deleting():
+    state = {"reading": 0}
+
+    def paged(items):
+        state["reading"] += 1
+        yield from items
+        state["reading"] -= 1
+
+    def delete_guard(*args, **kwargs):
+        assert state["reading"] == 0, "deleted while a list was still being read"
+
+    project, openai_client = MagicMock(), MagicMock()
+    project.agents.list.side_effect = lambda: paged(
+        [SimpleNamespace(name="carecompanion-agent"), SimpleNamespace(name="x")]
+    )
+    openai_client.vector_stores.list.side_effect = lambda: paged(
+        [SimpleNamespace(id="vs_1", name="northfield-policies"),
+         SimpleNamespace(id="vs_2", name="northfield-policies")]
+    )
+    project.agents.delete.side_effect = delete_guard
+    openai_client.vector_stores.delete.side_effect = delete_guard
+
+    cleanup(project, openai_client)
+
+    project.agents.delete.assert_called_once_with("carecompanion-agent")
+    assert openai_client.vector_stores.delete.call_count == 2
