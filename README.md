@@ -57,7 +57,7 @@ How the agent stays grounded in `data/`:
 Measured in this repo:
 
 - 72 offline tests pass with `python -m pytest`.
-- `az bicep build` succeeds on all 4 templates in `infra/`.
+- `az bicep build` succeeds on all 5 templates in `infra/`.
 
 ## Lab pipeline
 
@@ -162,7 +162,7 @@ Never print or commit either env file.
 |   |-- RUNBOOK.md                         deploy, run, clean up, destroy
 |   |-- User_Guide.pdf, Architecture_Overview.pdf, Project_Overview.pdf
 |-- infra/
-|   |-- main.bicep, foundry.bicep, models.bicep, roles.bicep
+|   |-- main.bicep, foundry.bicep, models.bicep, roles.bicep, budget.bicep
 |   |-- deploy.sh, destroy.sh
 |-- src/
 |   |-- hospital_tools.py                  agent tools over data/
