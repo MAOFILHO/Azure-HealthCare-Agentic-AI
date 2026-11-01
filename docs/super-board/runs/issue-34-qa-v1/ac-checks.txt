@@ -1,0 +1,11 @@
+head: 8f88acf
+$ grep -in k21 README.md  (exit 1; 1 = no match)
+$ git diff --numstat origin/staging...HEAD
+4	4	README.md
+$ git diff -U0 origin/staging...HEAD | grep '^@@'
+@@ -23 +23 @@ CareCo
+@@ -26 +26 @@ CareCo
+@@ -114 +114 @@ Conn
+@@ -116 +116 @@ Conn
+command lines (python|pip|bash|az|pytest) identical to base: yes
+paths referenced in README all exist: yes

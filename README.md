@@ -20,10 +20,10 @@ CareCompanion is a patient-services assistant for Northfield General, a fictiona
                           |
   infra/deploy.sh --> infra/main.bicep (subscription scope)
                           |
-              Resource group K21-project-rg (eastus2)
+              Resource group (eastus2)
                           |
           Foundry resource (AIServices, S0)
-           |-- Foundry project K21-healthcare
+           |-- Foundry project
            |     |-- agent carecompanion-agent    (lab02, lab04)
            |     |-- vector store northfield-policies (lab04)
            |-- deployment gpt-5-mini              (chat)
@@ -111,9 +111,9 @@ Connects an agent to the Microsoft Learn MCP server, then removes the agents and
 
 | Service | Use |
 |---|---|
-| Resource group `K21-project-rg` | Holds everything; deleted by `infra/destroy.sh` |
+| Resource group | Holds everything; deleted by `infra/destroy.sh` |
 | Foundry resource (AIServices, S0) | Hosts models, Content Understanding and the project |
-| Foundry project `K21-healthcare` | Agents, conversations, vector stores |
+| Foundry project | Agents, conversations, vector stores |
 | `gpt-5-mini` (GlobalStandard, 50K TPM) | Chat and agents |
 | `text-embedding-3-large` (GlobalStandard, 50K TPM) | Embeddings for file search |
 | Role assignments | Azure AI User, Cognitive Services User for the signed-in principal |
