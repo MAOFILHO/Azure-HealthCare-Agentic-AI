@@ -84,10 +84,11 @@ def _tool_named(agent, fn_name):
 @pytest.fixture
 def care_team(stub_azure, monkeypatch):
     booked = []
+    real_book = hospital_tools.book_appointment
 
     def spy_book(patient_id, department, date):
         booked.append((patient_id, department, date))
-        return hospital_tools.book_appointment(patient_id, department, date)
+        return real_book(patient_id, department, date)
 
     spy_book.__name__ = "book_appointment"
     monkeypatch.setattr(hospital_tools, "book_appointment", spy_book)
