@@ -5,12 +5,14 @@ import subprocess
 import unittest
 from pathlib import Path
 
-MAIN = Path(__file__).resolve().parent.parent / "infra" / "main.bicep"
+INFRA = Path(__file__).resolve().parent.parent / "infra"
+MAIN = INFRA / "main.bicep"
+FOUNDRY = INFRA / "foundry.bicep"
 
 
-def build() -> dict:
+def build(path: Path = MAIN) -> dict:
     out = subprocess.run(
-        ["az", "bicep", "build", "--file", str(MAIN), "--stdout"],
+        ["az", "bicep", "build", "--file", str(path), "--stdout"],
         capture_output=True, text=True,
     )
     assert out.returncode == 0, out.stderr
@@ -41,6 +43,14 @@ class MainBicepTest(unittest.TestCase):
         for name in ("projectEndpoint", "resourceEndpoint"):
             self.assertIn(name, o)
             self.assertNotIn("openai/v1", json.dumps(o[name]))
+
+    def test_module_endpoint_values_are_not_openai_v1(self):
+        # main.bicep outputs are module references, so the suffix can only show in the module itself.
+        o = build(FOUNDRY)["outputs"]
+        for name in ("projectEndpoint", "resourceEndpoint"):
+            value = json.dumps(o[name]["value"])
+            self.assertIn("services.ai.azure.com", value)
+            self.assertNotIn("openai/v1", value)
 
 
 if __name__ == "__main__":
