@@ -1,0 +1,7 @@
+compileall=0
+........................................................................ [ 97%]
+..                                                                       [100%]
+74 passed in 12.66s
+pytest=
+WARNING: A new Bicep release is available: v0.48.1. Upgrade now by running "az bicep upgrade".
+bicep=0
