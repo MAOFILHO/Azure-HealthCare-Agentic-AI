@@ -107,7 +107,9 @@
   "human_steps": []
  },
  "verify_commands": [
-  "python3 -m compileall -q src"
+  "python3 -m compileall -q src",
+  "python3 -m pytest -q",
+  "az bicep build --file infra/main.bicep --stdout > /dev/null"
  ],
  "collect": {
   "sources": [
