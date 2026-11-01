@@ -27,5 +27,16 @@ module foundry 'foundry.bicep' = {
   }
 }
 
+module models 'models.bicep' = {
+  name: 'models'
+  scope: rg
+  params: {
+    foundryName: foundryName
+  }
+  dependsOn: [foundry]
+}
+
 output projectEndpoint string = foundry.outputs.projectEndpoint
 output resourceEndpoint string = foundry.outputs.resourceEndpoint
+output chatDeploymentName string = models.outputs.chatDeploymentName
+output embeddingDeploymentName string = models.outputs.embeddingDeploymentName
