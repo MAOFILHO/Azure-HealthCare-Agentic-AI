@@ -56,7 +56,7 @@ How the agent stays grounded in `data/`:
 
 Measured in this repo:
 
-- 72 offline tests pass with `python -m pytest`.
+- Offline tests pass with `python -m pytest`.
 - `az bicep build` succeeds on all 4 templates in `infra/`.
 
 ## Lab pipeline

@@ -50,6 +50,11 @@ class ReadmeTests(unittest.TestCase):
                     "infra/deploy.sh", "infra/destroy.sh", "az login"]:
             self.assertIn(cmd, self.text)
 
+    def test_states_no_offline_test_count(self):
+        # A fixed count goes stale with every test card.
+        found = re.findall(r"\d+\s+offline\s+tests?", self.text, re.IGNORECASE)
+        self.assertEqual(found, [])
+
     def test_local_links_and_images_exist(self):
         targets = re.findall(r"\]\(([^)#\s]+)\)", self.text)
         local = [t for t in targets if not re.match(r"[a-z]+:", t)]
