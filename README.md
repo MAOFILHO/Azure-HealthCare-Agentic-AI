@@ -11,6 +11,9 @@ Every file here matches the guide exactly; the guide explains each one.
 4. Create the virtual environment and install packages:
    python -m venv .venv  ->  activate it  ->  pip install -r requirements.txt
 
+## Run it end to end
+See [docs/RUNBOOK.md](docs/RUNBOOK.md): deploy, run the labs in order, clean up, destroy.
+
 ## Contents
 - requirements.txt, env.sample, gitignore  - project config (Lab 1)
 - src/                                     - all lab scripts (Labs 1-7)
