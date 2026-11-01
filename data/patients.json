@@ -1,0 +1,29 @@
+[
+  {
+    "resourceType": "Patient",
+    "id": "PAT-1001",
+    "name": "Maria Rivera",
+    "birthDate": "1958-03-14",
+    "phone": "555-0187",
+    "primaryCareProvider": "Dr. A. Chen",
+    "notes": "Discharged 2026-07-15 after cardiac stent procedure."
+  },
+  {
+    "resourceType": "Patient",
+    "id": "PAT-1002",
+    "name": "James Okafor",
+    "birthDate": "1979-11-02",
+    "phone": "555-0134",
+    "primaryCareProvider": "Dr. S. Patel",
+    "notes": "Knee replacement scheduled; pre-op checks complete."
+  },
+  {
+    "resourceType": "Patient",
+    "id": "PAT-1003",
+    "name": "Linh Tran",
+    "birthDate": "1991-06-27",
+    "phone": "555-0158",
+    "primaryCareProvider": "Dr. M. Haddad",
+    "notes": "New patient; establishing care."
+  }
+]
