@@ -12,13 +12,18 @@ LAB_VECTOR_STORE_NAMES = {"northfield-policies"}
 
 
 def cleanup(project, openai_client):
+    # Read both lists to the end first: deleting while paging breaks the
+    # "after" cursor (it points at the item just deleted).
+    stores = list(openai_client.vector_stores.list())
+    agents = list(project.agents.list())
+
     # Vector stores from Lab 4 (every full re-run created a new one)
-    for store in openai_client.vector_stores.list():
+    for store in stores:
         if store.name in LAB_VECTOR_STORE_NAMES:
             print(f"Deleting vector store: {store.name} ({store.id})")
             openai_client.vector_stores.delete(vector_store_id=store.id)
 
-    for agent in project.agents.list():
+    for agent in agents:
         if agent.name in LAB_AGENT_NAMES:
             print(f"Deleting agent: {agent.name}")
             project.agents.delete(agent.name)
