@@ -46,6 +46,8 @@ The script writes a git-ignored dotenv file at the repo root, named `.env.foundr
 cp .env.foundry .env
 ```
 
+Optional budget step: `infra/deploy.sh --budget-email <your address>` also sets a 20 USD monthly budget with alerts at 75% and 100% of actual cost (`infra/budget.bicep`). Pass the address on the command line; never commit it.
+
 ## 3. Run the labs
 
 Run each command from the repo root with the virtual environment active. The order follows the User Guide, sections 8 to 11.
