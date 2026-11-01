@@ -1,0 +1,18 @@
+$ python -m pytest tests/test_lab05.py -v   (no Azure SDKs installed, no network)
+============================= test session starts ==============================
+platform darwin -- Python 3.14.7, pytest-9.2.0, pluggy-1.7.0 -- /private/tmp/claude-501/-Users-marco-K21-Azure-HealthCare-Agentic-AI/36feb72c-a43f-43b6-8956-1d81be3676f7/scratchpad/venv12/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/marco/K21/Azure-HealthCare-Agentic-AI/.claude/worktrees/issue-12-qa
+collecting ... collected 5 items
+tests/test_lab05.py::test_extract_writes_discharge_note_md PASSED        [ 20%]
+tests/test_lab05.py::test_structured_prompt_asks_for_the_defined_fields PASSED [ 40%]
+tests/test_lab05.py::test_structured_json_has_the_defined_fields PASSED  [ 60%]
+tests/test_lab05.py::test_structured_sends_note_markdown_to_configured_model PASSED [ 80%]
+tests/test_lab05.py::test_structured_rejects_non_json_reply PASSED       [100%]
+============================== 5 passed in 0.02s ===============================
+
+mutation 1: delete "- warning_signs" line from PROMPT -> test_structured_prompt_asks_for_the_defined_fields FAILED (restored, green)
+mutation 2: with_suffix(".md") -> ".txt" in lab05_extract.py -> test_extract_writes_discharge_note_md FAILED (restored, green)
+
+$ python -m pytest -q
+15 passed in 3.19s

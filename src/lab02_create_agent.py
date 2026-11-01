@@ -6,8 +6,6 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import PromptAgentDefinition
 
-load_dotenv()
-
 INSTRUCTIONS = """You are CareCompanion, the virtual patient-services
 assistant for Northfield General Hospital.
 
@@ -31,16 +29,25 @@ Style: warm, plain language, short answers. Confirm what the caller
 needs before answering if the request is ambiguous.
 """
 
-project = AIProjectClient(
-    endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
-    credential=DefaultAzureCredential(),
-)
+AGENT_NAME = "carecompanion-agent"
 
-agent = project.agents.create_version(
-    agent_name="carecompanion-agent",
-    definition=PromptAgentDefinition(
-        model=os.environ["FOUNDRY_MODEL_DEPLOYMENT_NAME"],
-        instructions=INSTRUCTIONS,
-    ),
-)
-print(f"Agent '{agent.name}' is now at version {agent.version}")
+
+def create_agent(project, model):
+    return project.agents.create_version(
+        agent_name=AGENT_NAME,
+        definition=PromptAgentDefinition(model=model, instructions=INSTRUCTIONS),
+    )
+
+
+def main():
+    load_dotenv()
+    project = AIProjectClient(
+        endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
+        credential=DefaultAzureCredential(),
+    )
+    agent = create_agent(project, os.environ["FOUNDRY_MODEL_DEPLOYMENT_NAME"])
+    print(f"Agent '{agent.name}' is now at version {agent.version}")
+
+
+if __name__ == "__main__":
+    main()
