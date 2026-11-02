@@ -2,6 +2,8 @@
 
 Tickets live on the GitHub Project board "CareCompanion build board" (MAOFILHO, #4).
 
+Lessons from past runs: [factory-lessons.md](factory-lessons.md).
+
 ## Ticket format
 
 ## Problem
