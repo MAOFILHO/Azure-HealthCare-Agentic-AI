@@ -4,7 +4,7 @@ targetScope = 'subscription'
 param resourceGroupName string = 'K21-project-rg'
 
 @description('Foundry resource (AIServices account) name. Also the custom subdomain.')
-param foundryName string = 'k21-healthcare'
+param foundryName string = 'k21-carecompanion'
 
 @description('Foundry project name.')
 param projectName string = 'K21-healthcare'
