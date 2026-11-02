@@ -1,6 +1,6 @@
 # Factory lessons
 
-Four mistakes the factory repeated in the first run (2026-11-01). Each cost a wave.
+Mistakes the factory repeated. Each cost a wave.
 
 ## 1. Invalid `gh pr view` field halts the run
 
@@ -25,3 +25,9 @@ Four mistakes the factory repeated in the first run (2026-11-01). Each cost a wa
 - **Symptom:** the second card to merge fails the gate with a merge conflict.
 - **Cause:** both cards edit the same file and the first one merged.
 - **Fix:** run cards that touch the same file in separate waves.
+
+## 5. A run asks Marco to pick A or B
+
+- **Symptom:** the reply ends with "A or B?" and the run waits for Marco (2026-11-02).
+- **Cause:** the rule to decide alone lived only in a private memory file, so the repo and other agents never saw it.
+- **Fix:** `AGENTS.md` has a Decisions rule. Pick the best option, record `Decided: X over Y, because Z`, and stop only for the 3 listed conditions, reported as a status line.

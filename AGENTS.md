@@ -7,6 +7,9 @@
 - Python 3.12. Add new dependencies to `requirements.txt`.
 - Keep changes small: one lab script or one tool per ticket.
 - Base branch is `staging`. Never push to `main`.
+- Decisions: agents decide. Pick the best option, then record `Decided: X over Y, because Z` in the PR or issue comment. Never end a reply with an A/B question for Marco.
+  - Stop only for: spend past the 20 USD cap, loss of non-demo data, or a step only a human can do (`az login`).
+  - Report a stop as a status line (`blocked-by:` or the Block template), not as a question.
 
 <!-- super-board:begin v3.3.0 (managed; edits inside are overwritten on upgrade) -->
 ## Super Board
