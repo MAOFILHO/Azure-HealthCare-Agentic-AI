@@ -35,7 +35,7 @@ class MainBicepTest(unittest.TestCase):
     def test_defaults_match_guide(self):
         p = self.arm["parameters"]
         self.assertEqual(p["resourceGroupName"]["defaultValue"], "K21-project-rg")
-        self.assertEqual(p["foundryName"]["defaultValue"], "k21-healthcare")
+        self.assertEqual(p["foundryName"]["defaultValue"], "k21-carecompanion")
         self.assertEqual(p["projectName"]["defaultValue"], "K21-healthcare")
         self.assertEqual(p["location"]["defaultValue"], "eastus2")
 
