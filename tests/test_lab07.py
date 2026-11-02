@@ -119,3 +119,28 @@ def test_cleanup_reads_every_list_to_the_end_before_deleting():
 
     project.agents.delete.assert_called_once_with("carecompanion-agent")
     assert openai_client.vector_stores.delete.call_count == 2
+
+
+def test_lab07_hides_only_the_mcp_ping_deprecation_warning():
+    import importlib
+    import warnings
+
+    import lab07_mcp
+    from mcp import MCPDeprecationWarning
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        importlib.reload(lab07_mcp)
+        warnings.warn(
+            "ping is removed as of 2026-07-28; the method only works under "
+            "mode='legacy'.",
+            MCPDeprecationWarning,
+        )
+        warnings.warn(
+            "The logging capability is deprecated as of 2026-07-28.",
+            MCPDeprecationWarning,
+        )
+
+    assert [str(w.message) for w in caught] == [
+        "The logging capability is deprecated as of 2026-07-28."
+    ]

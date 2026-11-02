@@ -1,6 +1,7 @@
 """Lab 7 - An agent that uses the Microsoft Learn MCP server."""
 import asyncio
 import os
+import warnings
 
 from dotenv import load_dotenv
 from azure.identity import AzureCliCredential
@@ -8,6 +9,11 @@ from agent_framework import Agent, MCPStreamableHTTPTool
 from agent_framework.foundry import FoundryChatClient
 
 MCP_URL = "https://learn.microsoft.com/api/mcp"
+
+# agent_framework's MCP tool calls the SDK's ping on connect. The mcp 2.x
+# SDK warns that ping is removed as of 2026-07-28; the call still works and
+# this lab does not make it, so hide only that one message.
+warnings.filterwarnings("ignore", message="ping is removed as of")
 
 
 def learn_tool():
