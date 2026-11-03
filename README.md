@@ -149,6 +149,8 @@ rm -f .env .env.foundry
 
 Never print or commit either env file.
 
+Deploying again after `infra/destroy.sh`: the script deletes the resource group only, so the Foundry account stays soft-deleted. A new deploy with the same `foundryName` (default `k21-carecompanion` in `infra/main.bicep`) fails with `FlagMustBeSetForRestore`. Set a new `foundryName`, or purge the soft-deleted account first.
+
 ## Project structure
 
 ```
@@ -183,6 +185,7 @@ The tests need no Azure access. CI also runs `az bicep build --file <template> -
 
 - Region: `eastus2` (East US 2), the default in `infra/main.bicep` and `infra/deploy.sh`. The User Guide uses the same region.
 - Cost: the User Guide estimates $1 to $2 for the 3 to 4 hours the labs take. That figure includes a lab VM, which this repo does not deploy. Run `infra/destroy.sh` when you finish so nothing keeps billing.
+- Budget (optional): `infra/deploy.sh --budget-email ADDRESS` also deploys `infra/budget.bicep`, a 20 USD monthly budget that emails alerts at 75% and 100% of actual cost. Pass the address on the command line; never commit it. See [docs/RUNBOOK.md](docs/RUNBOOK.md).
 
 ## Key engineering decisions
 
