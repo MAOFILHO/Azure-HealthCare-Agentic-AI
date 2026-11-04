@@ -61,7 +61,10 @@ class ReadmeTests(unittest.TestCase):
         missing = [t for t in local if not (ROOT / t).exists()]
         self.assertEqual(missing, [])
         images = re.findall(r"!\[[^\]]*\]\(([^)\s]+)\)", self.text)
-        self.assertEqual([i for i in images if re.match(r"[a-z]+:", i)], [])
+        # Badges are the only remote images allowed, and only over https.
+        badge = r"https://(img\.shields\.io|github\.com/MAOFILHO/Azure-HealthCare-Agentic-AI/actions)/"
+        remote = [i for i in images if re.match(r"[a-z]+:", i)]
+        self.assertEqual([i for i in remote if not re.match(badge, i)], [])
 
     def test_links_the_runbook(self):
         self.assertIn("](docs/RUNBOOK.md)", self.text)
