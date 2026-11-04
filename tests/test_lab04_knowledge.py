@@ -67,3 +67,16 @@ def test_agent_has_file_search_tool_attached(lab04):
     (tool,) = kwargs["definition"].tools
     assert isinstance(tool, FakeFileSearchTool)
     assert tool.vector_store_ids == ["vs-test"]
+
+
+AGENT_REFERENCE = {"name": "carecompanion-agent", "type": "agent_reference"}
+
+
+def test_client_is_not_agent_bound(lab04):
+    for call in lab04.project.get_openai_client.call_args_list:
+        assert "agent_name" not in call.kwargs
+
+
+def test_agent_response_sends_agent_reference(lab04):
+    kwargs = lab04.openai_client.responses.create.call_args.kwargs
+    assert kwargs["extra_body"] == {"agent_reference": AGENT_REFERENCE}
