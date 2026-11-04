@@ -25,6 +25,68 @@ CareCompanion is a patient-services assistant for Northfield General, a fictiona
 
 ## Architecture
 
+![CareCompanion architecture on Microsoft Foundry](docs/images/architecture.png)
+
+Source: [docs/Architecture_Overview.pdf](docs/Architecture_Overview.pdf).
+
+### Agent structure
+
+Lab 6 runs two multi-agent patterns. In the care team (`src/lab06_care_team.py`), the coordinator calls each specialist as a tool, and only the specialists touch the hospital data. In the pipeline (`src/lab06_pipeline.py`), two agents run in a fixed order and each one passes its output to the next.
+
+```mermaid
+flowchart LR
+    caller([Caller]) <--> coord
+
+    subgraph care["Care team (lab06_care_team.py)"]
+        coord["CareCoordinator<br/>orchestrator"]
+        records["RecordsSpecialist<br/>sub-agent"]
+        sched["SchedulingSpecialist<br/>sub-agent"]
+        coord <-- "records_specialist tool" --> records
+        coord <-- "scheduling_specialist tool" --> sched
+    end
+
+    records --> find["find_patient"]
+    sched --> getappt["get_appointments"]
+    sched --> book["book_appointment"]
+    find --> patients[("patients.json")]
+    getappt --> appts[("appointments.json")]
+    book --> appts
+```
+
+How the agents talk, for the Lab 6 demo request:
+
+```mermaid
+sequenceDiagram
+    actor Caller
+    participant C as CareCoordinator
+    participant R as RecordsSpecialist
+    participant S as SchedulingSpecialist
+    Caller->>C: Book Maria Rivera's cardiology follow-up if missing
+    C->>R: records_specialist("Maria Rivera")
+    R->>R: find_patient tool
+    R-->>C: patient record and ID
+    C->>S: scheduling_specialist(patient ID)
+    S->>S: get_appointments tool
+    alt no cardiology follow-up
+        S->>S: book_appointment tool
+    end
+    S-->>C: appointments or new booking
+    C-->>Caller: one complete answer
+```
+
+The pipeline needs no orchestrator. Each agent hands its output to the next:
+
+```mermaid
+flowchart LR
+    note[("discharge_note.md")] --> extractor["NoteExtractor<br/>facts as bullets"]
+    extractor -- "extracted facts" --> writer["PatientWriter<br/>plain-language rewrite"]
+    writer --> summary(["After-visit summary"])
+```
+
+Every agent calls the same Foundry chat deployment through `FoundryChatClient`. Specialists answer only through the coordinator. They never reply to the caller directly.
+
+### Resources
+
 ```
             az login (azure-identity credentials)
                           |
