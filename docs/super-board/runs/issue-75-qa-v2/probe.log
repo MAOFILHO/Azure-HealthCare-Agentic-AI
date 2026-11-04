@@ -1,0 +1,7 @@
+# Read-only probe, 2026-11-04T14:14Z, same env as live-run.log
+# 12 x openai_client.vector_stores.list(limit=1), 1 s apart
+host suffix: services.ai.azure.com
+ok=12 404=0
+# Reads are stable. The 404 "Subdomain does not map to a resource" hits write calls:
+# files.create (live-run.log run1-3), vector_stores.files.create (v1 run1-2),
+# vector_stores.files.retrieve right after create (issue #75 context).
