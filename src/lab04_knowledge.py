@@ -1,7 +1,9 @@
 """Lab 4 - Ground CareCompanion in the hospital's policy documents."""
 import os
+import time
 from pathlib import Path
 
+import openai
 from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
@@ -9,6 +11,8 @@ from azure.ai.projects.models import FileSearchTool, PromptAgentDefinition
 
 load_dotenv()
 POLICY_DIR = Path(__file__).resolve().parent.parent / "data" / "policies"
+POLL_SECONDS = 2
+POLL_TIMEOUT_SECONDS = 60
 
 INSTRUCTIONS = """You are CareCompanion, the virtual patient-services
 assistant for Northfield General Hospital.
@@ -35,13 +39,41 @@ project = AIProjectClient(
 )
 openai_client = project.get_openai_client()
 
+
+
+def wait_until_indexed(client, vector_store_id, file_id):
+    """Poll until the file is indexed. The service answers 404 for a short
+    time after create, so a NotFoundError means "not ready yet"."""
+    deadline = time.monotonic() + POLL_TIMEOUT_SECONDS
+    while True:
+        try:
+            status = client.vector_stores.files.retrieve(
+                file_id, vector_store_id=vector_store_id
+            )
+            if status.status == "completed":
+                return
+            if status.status in ("failed", "cancelled"):
+                raise RuntimeError(
+                    f"File {file_id} {status.status}: {status.last_error}"
+                )
+        except openai.NotFoundError:
+            pass
+        if time.monotonic() >= deadline:
+            raise TimeoutError(
+                f"File {file_id} not indexed after {POLL_TIMEOUT_SECONDS} seconds"
+            )
+        time.sleep(POLL_SECONDS)
+
+
 # 1. Create a vector store and index every policy file into it
 vector_store = openai_client.vector_stores.create(name="northfield-policies")
 for policy_file in sorted(POLICY_DIR.glob("*.md")):
     with policy_file.open("rb") as fh:
-        openai_client.vector_stores.files.upload_and_poll(
-            vector_store_id=vector_store.id, file=fh,
-        )
+        uploaded = openai_client.files.create(file=fh, purpose="assistants")
+    openai_client.vector_stores.files.create(
+        vector_store_id=vector_store.id, file_id=uploaded.id,
+    )
+    wait_until_indexed(openai_client, vector_store.id, uploaded.id)
     print(f"Indexed {policy_file.name}")
 
 # 2. Publish a new agent version with the file search tool attached
