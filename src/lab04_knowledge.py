@@ -65,14 +65,28 @@ def wait_until_indexed(client, vector_store_id, file_id):
         time.sleep(POLL_SECONDS)
 
 
+def retry_not_found(call):
+    """Run call until it stops raising NotFoundError. The service also
+    answers 404 on create calls for a short time after the vector store
+    or file is made. After the timeout the last 404 is raised."""
+    deadline = time.monotonic() + POLL_TIMEOUT_SECONDS
+    while True:
+        try:
+            return call()
+        except openai.NotFoundError:
+            if time.monotonic() >= deadline:
+                raise
+        time.sleep(POLL_SECONDS)
+
+
 # 1. Create a vector store and index every policy file into it
 vector_store = openai_client.vector_stores.create(name="northfield-policies")
 for policy_file in sorted(POLICY_DIR.glob("*.md")):
     with policy_file.open("rb") as fh:
         uploaded = openai_client.files.create(file=fh, purpose="assistants")
-    openai_client.vector_stores.files.create(
+    retry_not_found(lambda: openai_client.vector_stores.files.create(
         vector_store_id=vector_store.id, file_id=uploaded.id,
-    )
+    ))
     wait_until_indexed(openai_client, vector_store.id, uploaded.id)
     print(f"Indexed {policy_file.name}")
 

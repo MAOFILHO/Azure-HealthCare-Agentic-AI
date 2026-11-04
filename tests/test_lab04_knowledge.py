@@ -40,11 +40,12 @@ def completed():
 def run_lab04(monkeypatch):
     """Run lab04 with every Azure dependency mocked, so there is no network."""
 
-    def run(retrieve_side_effect=None):
+    def run(retrieve_side_effect=None, attach_side_effect=None):
         openai_client = MagicMock(name="openai_client")
         openai_client.vector_stores.create.return_value.id = "vs-test"
         files = openai_client.vector_stores.files
         files.retrieve.side_effect = retrieve_side_effect or (lambda *a, **k: completed())
+        files.create.side_effect = attach_side_effect
         project = MagicMock(name="project")
         project.get_openai_client.return_value = openai_client
 
@@ -124,6 +125,31 @@ def test_never_ready_times_out(run_lab04):
 
     with pytest.raises(TimeoutError, match="60"):
         run_lab04(retrieve)
+
+
+def test_not_found_on_attach_is_retried(run_lab04):
+    calls = []
+
+    def attach(*args, **kwargs):
+        calls.append(1)
+        if len(calls) == 1:
+            raise not_found()
+
+    lab = run_lab04(attach_side_effect=attach)
+    assert len(calls) == 4  # 1 miss then ok for file 1, then ok for files 2 and 3
+    assert lab.project.agents.create_version.called
+
+
+def test_attach_never_found_raises_after_60_seconds(run_lab04):
+    calls = []
+
+    def attach(*args, **kwargs):
+        calls.append(time.monotonic())
+        raise not_found()
+
+    with pytest.raises(openai.NotFoundError):
+        run_lab04(attach_side_effect=attach)
+    assert calls[-1] - calls[0] >= 60
 
 
 def test_agent_has_file_search_tool_attached(lab04):
