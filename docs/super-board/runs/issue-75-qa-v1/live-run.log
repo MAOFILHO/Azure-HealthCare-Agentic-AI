@@ -1,0 +1,16 @@
+Indexed billing_faq.md
+Indexed discharge_process.md
+Traceback (most recent call last):
+  File "<repo>/.claude/worktrees/issue-75-qa/src/lab04_knowledge.py", line 73, in <module>
+    openai_client.vector_stores.files.create(
+  File "<repo>/.venv/lib/python3.12/site-packages/openai/resources/vector_stores/files.py", line 104, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "<repo>/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1474, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1248, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.NotFoundError: Error code: 404 - Subdomain does not map to a resource.
+timeout 400 <repo>/.venv/bin/python   0.81s user 0.17s system 4% cpu 20.360 total
+exit=1
