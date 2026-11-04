@@ -1,12 +1,16 @@
 # CareCompanion
 
-[![CI](https://github.com/MAOFILHO/Azure-HealthCare-Agentic-AI/actions/workflows/ci.yml/badge.svg?branch=staging)](https://github.com/MAOFILHO/Azure-HealthCare-Agentic-AI/actions/workflows/ci.yml)
-![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)
-![Azure](https://img.shields.io/badge/Azure-cloud-0078D4?style=flat&logo=microsoftazure&logoColor=white)
-![Microsoft Foundry](https://img.shields.io/badge/Microsoft-Foundry-5E5E5E?style=flat&logo=microsoft&logoColor=white)
-![Bicep](https://img.shields.io/badge/IaC-Bicep-0078D4?style=flat&logo=microsoftazure&logoColor=white)
-![pytest](https://img.shields.io/badge/tests-pytest%20offline-0A9EDC?style=flat&logo=pytest&logoColor=white)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![azure-ai-projects](https://img.shields.io/badge/azure--ai--projects-2.7.0-0078D4?logo=microsoftazure&logoColor=white)
+![openai](https://img.shields.io/badge/openai-3.42.0-412991?logo=openai&logoColor=white)
+![Agent Framework](https://img.shields.io/badge/Agent%20Framework-1.x-5E5E5E?logo=microsoft&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-2.x-000000?logo=modelcontextprotocol&logoColor=white)
+![Microsoft Foundry](https://img.shields.io/badge/Microsoft-Foundry-0078D4?logo=microsoft&logoColor=white)
+![Bicep](https://img.shields.io/badge/IaC-Bicep-0078D4?logo=microsoftazure&logoColor=white)
+![pytest](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+[![CI](https://github.com/MAOFILHO/Azure-HealthCare-Agentic-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/MAOFILHO/Azure-HealthCare-Agentic-AI/actions/workflows/ci.yml)
 
 CareCompanion is a patient-services assistant for Northfield General, a fictional hospital. It answers visiting-hours and billing questions from policy documents, looks up demo patients and appointments, reads a discharge note, and runs small multi-agent workflows. It is built in seven labs that follow the AI-103 healthcare lab guide (`docs/User_Guide.pdf`). All infrastructure is Bicep, deployed and destroyed by two scripts: zero Azure portal clicks. All data is synthetic.
 
