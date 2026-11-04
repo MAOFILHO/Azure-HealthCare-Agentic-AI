@@ -50,8 +50,14 @@ class MainBicepTest(unittest.TestCase):
         o = build(FOUNDRY)["outputs"]
         for name in ("projectEndpoint", "resourceEndpoint"):
             value = json.dumps(o[name]["value"])
-            self.assertIn("services.ai.azure.com", value)
             self.assertNotIn("openai/v1", value)
+        self.assertIn("services.ai.azure.com", json.dumps(o["projectEndpoint"]["value"]))
+
+    def test_resource_endpoint_uses_cognitiveservices_host(self):
+        # Content Understanding is served on the account host, not services.ai.azure.com (issue #73).
+        value = json.dumps(build(FOUNDRY)["outputs"]["resourceEndpoint"]["value"])
+        self.assertIn(".cognitiveservices.azure.com/", value)
+        self.assertNotIn("services.ai.azure.com", value)
 
 
 @unittest.skipUnless(shutil.which("az"), "az CLI not installed")
