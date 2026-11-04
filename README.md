@@ -139,23 +139,65 @@ az login
 
 ## Running the project
 
-The full walk-through, with the expected output of every step, is in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+This is the full dry-run: deploy, all 7 labs in order, cleanup, teardown. Run every command from the repo root with the virtual environment active (see Prerequisites and setup). [docs/RUNBOOK.md](docs/RUNBOOK.md) has the same steps with more detail.
+
+Never print or commit `.env` or `.env.foundry`. Use demo data only.
+
+### Step 1: Deploy
 
 ```bash
+az login
 infra/deploy.sh --what-if   # preview, changes nothing
 infra/deploy.sh             # deploy, writes .env.foundry
 cp .env.foundry .env        # the labs read .env
+```
 
-python src/lab01_chat.py    # then each lab in order, see the runbook
+Expected from the deploy: `Deployed. Wrote 3 variables to the env file (values not shown).`
 
-python src/lab07_cleanup.py # remove lab agents and vector stores
-infra/destroy.sh            # delete the resource group (asks for its name)
+### Step 2: Run the labs, in order
+
+Each lab calls the live Foundry project. The Foundry service sometimes answers `404 Subdomain does not map to a resource` for a few seconds. Lab 4 and the cleanup script retry on their own. For any other lab, wait a minute and run it again.
+
+| Lab | Command | You should see |
+|---|---|---|
+| 1 | `python src/lab01_chat.py` | A two-sentence description of a hospital care coordinator |
+| 2a | `python src/lab02_create_agent.py` | `Agent 'carecompanion-agent' is now at version 1` (the number rises on a re-run) |
+| 2b | `python src/lab02_chat.py` | A `You:` prompt. Ask "What are the visiting hours?", then type `quit` |
+| 3 | `python src/lab03_tools.py` | A `You:` prompt. Ask about Maria Rivera's appointments, then ask to book a lab draw, then type `quit` |
+| 4 | `python src/lab04_knowledge.py` | One `Indexed <file>` line per policy file, then an ICU visiting-hours answer from the policy files |
+| 5a | `python src/lab05_extract.py` | The discharge note saved to `data/discharge_note.md`, first lines printed |
+| 5b | `python src/lab05_structured.py` | A JSON record with diagnosis, medications, follow-up and warning signs |
+| 6a | `python src/lab06_care_team.py` | The coordinator reports Maria Rivera already has a cardiology follow-up, so no new booking |
+| 6b | `python src/lab06_pipeline.py` | A plain-language after-visit summary that ends with the hospital contact number |
+| 7 | `python src/lab07_mcp.py` | The Microsoft Learn tools are listed, then an answer about the Foundry project endpoint |
+
+Notes:
+
+- Lab 2b needs Lab 2a first, because it chats with the agent that 2a creates.
+- Lab 4 creates a new version of `carecompanion-agent` with file search attached, so run it after Lab 2a to keep the version history in order.
+- Lab 3 booking is a mock. It saves nothing.
+- Lab 5a rewrites `data/discharge_note.md`. Run `git restore data/discharge_note.md` if you do not want that change in your working tree.
+- Optional tracing for Lab 3: set `ENABLE_CONSOLE_EXPORTERS=true` before the command. Spans print to the terminal. Nothing goes to Azure.
+
+### Step 3: Clean up the lab objects
+
+```bash
+python src/lab07_cleanup.py
+```
+
+Expected: one `Deleting vector store` or `Deleting agent` line per object, then `Lab agents and vector stores cleared.` It deletes only `carecompanion-agent` and `northfield-policies`.
+
+### Step 4: Tear down Azure
+
+```bash
+infra/destroy.sh            # asks you to type the group name: K21-project-rg
+az cognitiveservices account purge --name k21-carecompanion --resource-group K21-project-rg --location eastus2
 rm -f .env .env.foundry
 ```
 
-Never print or commit either env file.
+Expected: `Deleted K21-project-rg.` A wrong name deletes nothing. Billing stops once the group is deleted.
 
-Deploying again after `infra/destroy.sh`: the script deletes the resource group only, so the Foundry account stays soft-deleted. A new deploy with the same `foundryName` (default `k21-carecompanion` in `infra/main.bicep`) fails with `FlagMustBeSetForRestore`. Set a new `foundryName`, or purge the soft-deleted account first.
+Deploying again after `infra/destroy.sh`: the script deletes the resource group only, so the Foundry account stays soft-deleted. A new deploy with the same `foundryName` (default `k21-carecompanion` in `infra/main.bicep`) fails with `FlagMustBeSetForRestore`. Run the `purge` command above first, or set a new `foundryName`.
 
 ## Project structure
 
