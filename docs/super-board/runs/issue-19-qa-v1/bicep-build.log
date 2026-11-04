@@ -1,0 +1,4 @@
+infra/foundry.bicep exit=0
+infra/main.bicep exit=0
+infra/models.bicep exit=0
+infra/roles.bicep exit=0

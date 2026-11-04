@@ -1,0 +1,10 @@
+........................................................................ [ 81%]
+................                                                         [100%]
+88 passed in 13.25s
+--- red check (demo-date line removed) ---
+FAILED tests/test_lab03_tools.py::test_instructions_pin_the_demo_date - asser...
+1 failed, 5 deselected in 0.02s
+--- restored ---
+1 passed, 5 deselected in 0.01s
+--- az cognitiveservices account list ---
+[]
