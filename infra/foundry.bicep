@@ -29,5 +29,5 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
   properties: {}
 }
 
-output resourceEndpoint string = 'https://${foundryName}.services.ai.azure.com/'
+output resourceEndpoint string = 'https://${foundryName}.cognitiveservices.azure.com/'
 output projectEndpoint string = 'https://${foundryName}.services.ai.azure.com/api/projects/${project.name}'

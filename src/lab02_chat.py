@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
 
+AGENT_REFERENCE = {"agent_reference": {"name": "carecompanion-agent", "type": "agent_reference"}}
+
 
 def chat(openai_client, read_input=input, write=print):
     # A conversation = server-side message history for THIS exchange
@@ -18,6 +20,7 @@ def chat(openai_client, read_input=input, write=print):
         response = openai_client.responses.create(
             conversation=conversation.id,
             input=user_text,
+            extra_body=AGENT_REFERENCE,
         )
         write(f"\nCareCompanion: {response.output_text}")
 
@@ -28,9 +31,9 @@ def main():
         endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
         credential=DefaultAzureCredential(),
     )
-    # The OpenAI client is pre-bound to the agent: every response uses its
-    # instructions and model automatically.
-    chat(project.get_openai_client(agent_name="carecompanion-agent"))
+    # The agent-bound route returns 404. Use the plain client and point each
+    # response at the agent with agent_reference.
+    chat(project.get_openai_client())
 
 
 if __name__ == "__main__":

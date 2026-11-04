@@ -1,0 +1,7 @@
+c9b66f8 offline verification, 2026-11-04
+python3 -m compileall -q src -> exit 0
+.venv/bin/python -m pytest -q -> 102 passed
+az bicep build --file infra/main.bicep --stdout -> exit 0
+grep upload_and_poll src/lab04_knowledge.py -> no match (AC1)
+mutation: except openai.NotFoundError -> ZeroDivisionError: 8 lab04 tests red, restored green
+mutation: drop "failed" from the failed/cancelled tuple: test_failed_file_raises_clear_error red, restored green

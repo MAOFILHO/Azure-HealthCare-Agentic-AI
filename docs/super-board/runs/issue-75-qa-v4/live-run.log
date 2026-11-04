@@ -1,0 +1,31 @@
+# Live Lab 4 runs on a71f3d3. Command: .venv/bin/python -u src/lab04_knowledge.py from the QA worktree, 15 min outer cap per run.
+=== run1 2026-11-04T17:14:38Z
+Indexed billing_faq.md
+Indexed discharge_process.md
+Indexed visiting_hours.md
+carecompanion-agent is now version 3 (file search attached)
+
+Sorry — ICU visiting hours are 10:00 am to 8:00 pm daily, so a 9:00 pm visit isn’t allowed. Two visitors at a time are permitted and immediate family are preferred; overnight guests are not permitted in the ICU. 
+
+If you think an exception is needed, please call Patient Services at 555-0100.
+run1 exit=0 seconds=65
+=== run2 2026-11-04T17:15:43Z
+Indexed billing_faq.md
+Indexed discharge_process.md
+Indexed visiting_hours.md
+carecompanion-agent is now version 4 (file search attached)
+
+Short answer: no — ICU visiting hours end at 8:00 pm.
+
+Per Northfield General Hospital policy, ICU visiting hours are 10:00 am to 8:00 pm daily (two visitors at a time, immediate family preferred) . The document does not describe after‑hours exceptions, so if you need an exception or more information please contact Patient Services at 555-0100 or ask the ICU charge nurse.
+run2 exit=0 seconds=47
+=== run3 2026-11-04T17:16:30Z
+Indexed billing_faq.md
+Indexed discharge_process.md
+Indexed visiting_hours.md
+carecompanion-agent is now version 5 (file search attached)
+
+Short answer: No — ICU visiting hours end at 8:00 pm. The ICU is open to visitors 10:00 am–8:00 pm daily (two visitors at a time; immediate family preferred) .
+
+If this is urgent or you need an exception, call Patient Services at 555-0100 or ask the ICU charge nurse.
+run3 exit=0 seconds=46

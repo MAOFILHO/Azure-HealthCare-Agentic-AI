@@ -1,6 +1,8 @@
 """Lab 7 - Delete the cloud objects the labs created."""
 import os
+import time
 
+import openai
 from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
@@ -9,6 +11,23 @@ from azure.ai.projects import AIProjectClient
 # Anything else in the project is not ours and is left alone.
 LAB_AGENT_NAMES = {"carecompanion-agent"}
 LAB_VECTOR_STORE_NAMES = {"northfield-policies"}
+
+DELETE_TRIES = 5
+DELETE_WAIT_SECONDS = 3
+
+
+def delete_vector_store(openai_client, store_id):
+    # The service sometimes answers 404 for a store it just created, so a
+    # NotFoundError is retried. After the last try, warn and go on.
+    for attempt in range(1, DELETE_TRIES + 1):
+        try:
+            openai_client.vector_stores.delete(vector_store_id=store_id)
+            return
+        except openai.NotFoundError:
+            if attempt == DELETE_TRIES:
+                print(f"Warning: could not delete vector store {store_id} (404 after {DELETE_TRIES} tries)")
+            else:
+                time.sleep(DELETE_WAIT_SECONDS)
 
 
 def cleanup(project, openai_client):
@@ -21,7 +40,7 @@ def cleanup(project, openai_client):
     for store in stores:
         if store.name in LAB_VECTOR_STORE_NAMES:
             print(f"Deleting vector store: {store.name} ({store.id})")
-            openai_client.vector_stores.delete(vector_store_id=store.id)
+            delete_vector_store(openai_client, store.id)
 
     for agent in agents:
         if agent.name in LAB_AGENT_NAMES:
