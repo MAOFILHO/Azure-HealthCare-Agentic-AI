@@ -6,6 +6,7 @@
 - Never read, print or commit dotenv files or keys. Use environment variables.
 - Python 3.12. Add new dependencies to `requirements.txt`.
 - Keep changes small: one lab script or one tool per ticket.
+- A PR that touches `src/` or `infra/` must paste the `RUN_LIVE=1 pytest -m live` result in its body when Azure is deployed.
 - Base branch is `staging`. Never push to `main`.
 - Decisions: agents decide. Pick the best option, then record `Decided: X over Y, because Z` in the PR or issue comment. Never end a reply with an A/B question for Marco.
   - Stop only for: spend past the 20 USD cap, loss of non-demo data, or a step only a human can do (`az login`).
