@@ -8,7 +8,7 @@ README = ROOT / "README.md"
 
 # The issue's outline, in order. Section 1 is the title line.
 SECTIONS = [
-    "# CareCompanion",
+    "# Azure HealthCare Agentic AI: CareCompanion Project",
     "## Why this is production-grade",
     "## Architecture",
     "## The problem and the solution",

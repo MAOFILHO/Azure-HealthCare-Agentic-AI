@@ -1,4 +1,4 @@
-# CareCompanion
+# Azure HealthCare Agentic AI: CareCompanion Project
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![azure-ai-projects](https://img.shields.io/badge/azure--ai--projects-2.7.0-0078D4?logo=microsoftazure&logoColor=white)
