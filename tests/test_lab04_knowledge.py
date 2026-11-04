@@ -3,7 +3,7 @@ import sys
 import time
 import types
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import DEFAULT, MagicMock
 
 import httpx
 import openai
@@ -36,16 +36,35 @@ def completed():
     return types.SimpleNamespace(status="completed", last_error=None)
 
 
+def make_fail_once(client, path):
+    """The call at path (e.g. "files.create") raises 404 once, then works."""
+    mock = client
+    for part in path.split("."):
+        mock = getattr(mock, part)
+    then = mock.side_effect
+    seen = []
+
+    def effect(*args, **kwargs):
+        seen.append(1)
+        if len(seen) == 1:
+            raise not_found()
+        return then(*args, **kwargs) if then else DEFAULT
+
+    mock.side_effect = effect
+
+
 @pytest.fixture
 def run_lab04(monkeypatch):
     """Run lab04 with every Azure dependency mocked, so there is no network."""
 
-    def run(retrieve_side_effect=None, attach_side_effect=None):
+    def run(retrieve_side_effect=None, attach_side_effect=None, fail_once=None):
         openai_client = MagicMock(name="openai_client")
         openai_client.vector_stores.create.return_value.id = "vs-test"
         files = openai_client.vector_stores.files
         files.retrieve.side_effect = retrieve_side_effect or (lambda *a, **k: completed())
         files.create.side_effect = attach_side_effect
+        if fail_once:
+            make_fail_once(openai_client, fail_once)
         project = MagicMock(name="project")
         project.get_openai_client.return_value = openai_client
 
@@ -120,11 +139,32 @@ def test_failed_file_raises_clear_error(run_lab04):
 
 
 def test_never_ready_times_out(run_lab04):
+    in_progress = types.SimpleNamespace(status="in_progress", last_error=None)
+    with pytest.raises(TimeoutError, match="60"):
+        run_lab04(lambda *a, **k: in_progress)
+
+
+def test_poll_always_not_found_raises_after_6_tries(run_lab04):
+    calls = []
+
     def retrieve(*args, **kwargs):
+        calls.append(1)
         raise not_found()
 
-    with pytest.raises(TimeoutError, match="60"):
+    with pytest.raises(openai.NotFoundError):
         run_lab04(retrieve)
+    assert len(calls) == 6
+
+
+@pytest.mark.parametrize("call", [
+    "vector_stores.create",
+    "files.create",
+    "vector_stores.files.create",
+    "vector_stores.files.retrieve",
+])
+def test_every_file_and_vector_store_call_retries_404(run_lab04, call):
+    lab = run_lab04(fail_once=call)
+    assert lab.project.agents.create_version.called
 
 
 def test_not_found_on_attach_is_retried(run_lab04):
@@ -140,7 +180,7 @@ def test_not_found_on_attach_is_retried(run_lab04):
     assert lab.project.agents.create_version.called
 
 
-def test_attach_never_found_raises_after_60_seconds(run_lab04):
+def test_attach_never_found_raises_after_6_tries_2_seconds_apart(run_lab04):
     calls = []
 
     def attach(*args, **kwargs):
@@ -149,7 +189,8 @@ def test_attach_never_found_raises_after_60_seconds(run_lab04):
 
     with pytest.raises(openai.NotFoundError):
         run_lab04(attach_side_effect=attach)
-    assert calls[-1] - calls[0] >= 60
+    assert len(calls) == 6
+    assert calls[-1] - calls[0] == 10
 
 
 def test_agent_has_file_search_tool_attached(lab04):
