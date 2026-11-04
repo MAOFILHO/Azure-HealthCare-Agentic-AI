@@ -82,6 +82,10 @@ python src/lab03_tools.py
 
 Expected: the agent looks up Maria Rivera, lists her upcoming appointments, and books a lab draw for the requested day. Booking is a mock and persists nothing. The tools live in `src/hospital_tools.py`.
 
+**Tracing (optional).** Set `ENABLE_CONSOLE_EXPORTERS=true` before the command above.
+Each model call and each tool call, such as `find_patient`, then prints a span with its duration.
+Leave it unset and the output is unchanged. Nothing is sent to Azure.
+
 ### Lab 4: grounded answers from hospital policy
 
 ```bash

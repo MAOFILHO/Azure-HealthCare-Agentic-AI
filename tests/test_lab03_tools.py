@@ -12,6 +12,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import hospital_tools
 
 
+OTEL_CALLS = []
+
+
 class FakeAgent:
     """Stands in for agent_framework.Agent: records what lab03 wires up."""
 
@@ -38,6 +41,12 @@ def lab03(monkeypatch):
     module("azure.identity", AzureCliCredential=lambda: object())
     module("agent_framework", Agent=FakeAgent)
     module("agent_framework.foundry", FoundryChatClient=lambda **kw: object())
+    module(
+        "agent_framework.observability",
+        configure_otel_providers=lambda **kw: OTEL_CALLS.append(kw),
+    )
+    OTEL_CALLS.clear()
+    monkeypatch.delenv("ENABLE_CONSOLE_EXPORTERS", raising=False)
     monkeypatch.setenv("FOUNDRY_PROJECT_ENDPOINT", "https://example.invalid")
     monkeypatch.setenv("FOUNDRY_MODEL_DEPLOYMENT_NAME", "demo-model")
     FakeAgent.instances.clear()
@@ -75,3 +84,20 @@ def test_book_appointment_call_reaches_hospital_tools(lab03, monkeypatch):
 
     assert calls == [("PAT-1001", "Cardiology", "2026-12-01")]
     assert json.loads(result)["status"] == "confirmed"
+
+
+def test_tracing_is_off_without_the_variable(lab03, monkeypatch):
+    build_agent(lab03, monkeypatch)
+    assert OTEL_CALLS == []
+
+
+def test_tracing_is_configured_when_the_variable_is_true(lab03, monkeypatch):
+    monkeypatch.setenv("ENABLE_CONSOLE_EXPORTERS", "true")
+    build_agent(lab03, monkeypatch)
+    assert len(OTEL_CALLS) == 1
+
+
+def test_tracing_stays_off_when_the_variable_is_false(lab03, monkeypatch):
+    monkeypatch.setenv("ENABLE_CONSOLE_EXPORTERS", "false")
+    build_agent(lab03, monkeypatch)
+    assert OTEL_CALLS == []
