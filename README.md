@@ -25,6 +25,61 @@ CareCompanion is a patient-services assistant for Northfield General, a fictiona
 
 ## Architecture
 
+![CareCompanion architecture on Microsoft Foundry](docs/images/architecture.png)
+
+Source: [docs/Architecture_Overview.pdf](docs/Architecture_Overview.pdf).
+
+### Agent structure
+
+Lab 6 runs two multi-agent patterns. In the care team (`src/lab06_care_team.py`), the coordinator calls each specialist as a tool, and only the specialists touch the hospital data. In the pipeline (`src/lab06_pipeline.py`), two agents run in a fixed order and each one passes its output to the next.
+
+```mermaid
+flowchart TD
+    caller([Caller request]) --> coord
+
+    subgraph care["Care team: orchestrator and sub-agents (lab06_care_team.py)"]
+        coord["CareCoordinator<br/>orchestrator, no data tools"]
+        records["RecordsSpecialist<br/>sub-agent"]
+        sched["SchedulingSpecialist<br/>sub-agent"]
+        coord -- "records_specialist(name)" --> records
+        records -- "patient record" --> coord
+        coord -- "scheduling_specialist(patient ID)" --> sched
+        sched -- "appointments or booking" --> coord
+    end
+
+    subgraph tools["hospital_tools.py"]
+        find["find_patient"]
+        getappt["get_appointments"]
+        book["book_appointment"]
+    end
+
+    records --> find
+    sched --> getappt
+    sched --> book
+    find --> patients[("patients.json")]
+    getappt --> appts[("appointments.json")]
+    book --> appts
+
+    coord -- "one complete answer" --> caller
+
+    subgraph pipe["Pipeline: sequential workflow (lab06_pipeline.py)"]
+        note[("discharge_note.md")] --> extractor["NoteExtractor<br/>facts as bullets"]
+        extractor -- "extracted facts" --> writer["PatientWriter<br/>plain-language rewrite"]
+        writer --> summary(["After-visit summary"])
+    end
+
+    model{{"Foundry model deployment"}}
+    coord -.-> model
+    records -.-> model
+    sched -.-> model
+    extractor -.-> model
+    writer -.-> model
+```
+
+Solid arrows are calls and data. Dotted arrows are model calls: every agent uses the same Foundry chat deployment through `FoundryChatClient`.
+
+### Resources
+
 ```
             az login (azure-identity credentials)
                           |
