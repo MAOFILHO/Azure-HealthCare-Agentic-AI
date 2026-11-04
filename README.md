@@ -6,6 +6,7 @@
 ![Microsoft Foundry](https://img.shields.io/badge/Microsoft-Foundry-5E5E5E?style=flat&logo=microsoft&logoColor=white)
 ![Bicep](https://img.shields.io/badge/IaC-Bicep-0078D4?style=flat&logo=microsoftazure&logoColor=white)
 ![pytest](https://img.shields.io/badge/tests-pytest%20offline-0A9EDC?style=flat&logo=pytest&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat)](LICENSE)
 
 CareCompanion is a patient-services assistant for Northfield General, a fictional hospital. It answers visiting-hours and billing questions from policy documents, looks up demo patients and appointments, reads a discharge note, and runs small multi-agent workflows. It is built in seven labs that follow the AI-103 healthcare lab guide (`docs/User_Guide.pdf`). All infrastructure is Bicep, deployed and destroyed by two scripts: zero Azure portal clicks. All data is synthetic.
 
@@ -208,3 +209,5 @@ The tests need no Azure access. CI also runs `az bicep build --file <template> -
 ## Author
 
 Marcos Oliveira ([@MAOFILHO](https://github.com/MAOFILHO))
+
+License: MIT
