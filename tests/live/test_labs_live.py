@@ -19,9 +19,10 @@ pytestmark = [
     pytest.mark.skipif(os.environ.get("RUN_LIVE") != "1", reason="set RUN_LIVE=1 to run against Azure"),
 ]
 
-# (script, stdin, expected phrase). Order matters: lab04 publishes the agent version lab02 chats with.
+# (script, stdin, expected phrase). Order matters: lab02_create_agent publishes the agent lab02_chat talks to.
 LABS = [
     ("lab01_chat.py", None, "care"),
+    ("lab02_create_agent.py", None, "is now at version"),
     ("lab02_chat.py", "Hello\nquit\n", "CareCompanion:"),
     ("lab04_knowledge.py", None, "file search attached"),
     ("lab05_extract.py", None, "Saved extracted markdown"),
