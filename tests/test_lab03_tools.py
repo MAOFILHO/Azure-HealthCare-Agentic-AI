@@ -67,6 +67,11 @@ def test_agent_registers_the_three_tool_names(lab03, monkeypatch):
     assert names == ["find_patient", "get_appointments", "book_appointment"]
 
 
+def test_instructions_pin_the_demo_date(lab03, monkeypatch):
+    agent = build_agent(lab03, monkeypatch)
+    assert "Today's date is 2026-07-20 (demo date)." in agent.kwargs["instructions"]
+
+
 def test_book_appointment_call_reaches_hospital_tools(lab03, monkeypatch):
     calls = []
 

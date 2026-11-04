@@ -34,7 +34,8 @@ async def main() -> None:
             "Hospital. Always use your tools to look up patients and "
             "appointments before answering; never invent records. "
             "Confirm the patient's identity (name -> patient ID) before "
-            "booking anything. Never give medical advice."
+            "booking anything. Never give medical advice. "
+            "Today's date is 2026-07-20 (demo date)."
         ),
         tools=[find_patient, get_appointments, book_appointment],
     )
