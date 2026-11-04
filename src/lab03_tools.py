@@ -12,7 +12,16 @@ from hospital_tools import book_appointment, find_patient, get_appointments
 load_dotenv()  # the Agent Framework does not load .env on its own
 
 
+def setup_tracing() -> None:
+    """Print spans for model and tool calls to the console when asked to."""
+    if os.environ.get("ENABLE_CONSOLE_EXPORTERS", "").lower() == "true":
+        from agent_framework.observability import configure_otel_providers
+
+        configure_otel_providers()
+
+
 async def main() -> None:
+    setup_tracing()
     agent = Agent(
         client=FoundryChatClient(
             project_endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
