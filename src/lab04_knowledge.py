@@ -14,6 +14,8 @@ POLICY_DIR = Path(__file__).resolve().parent.parent / "data" / "policies"
 POLL_SECONDS = 2
 POLL_TIMEOUT_SECONDS = 60
 RETRY_TRIES = 6
+CALL_TIMEOUT_SECONDS = 60  # SDK default is 600; QA saw calls hang 10 to 66 min
+SDK_RETRIES = 3
 
 INSTRUCTIONS = """You are CareCompanion, the virtual patient-services
 assistant for Northfield General Hospital.
@@ -38,17 +40,21 @@ project = AIProjectClient(
     endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
     credential=DefaultAzureCredential(),
 )
-openai_client = project.get_openai_client()
+# A stuck call raises openai.APITimeoutError and the SDK resends it.
+openai_client = project.get_openai_client(
+    timeout=CALL_TIMEOUT_SECONDS, max_retries=SDK_RETRIES
+)
 
 
 def retry_not_found(call, tries=RETRY_TRIES):
-    """Run call, retrying openai.NotFoundError. The service answers 404 on
-    the file and vector store routes for a short time, about 1 call in 6.
-    After the last try the last 404 is raised."""
+    """Run call, retrying openai.NotFoundError and openai.APITimeoutError.
+    The service answers 404 on the file and vector store routes for a short
+    time, about 1 call in 6, and some calls hang. After the last try the last
+    error is raised."""
     for attempt in range(tries):
         try:
             return call()
-        except openai.NotFoundError:
+        except (openai.NotFoundError, openai.APITimeoutError):
             if attempt == tries - 1:
                 raise
             time.sleep(POLL_SECONDS)
@@ -72,18 +78,15 @@ def wait_until_indexed(client, vector_store_id, file_id):
         time.sleep(POLL_SECONDS)
 
 
-def upload(path):
-    """Upload one file. It opens the file again on every try."""
-    with path.open("rb") as fh:
-        return openai_client.files.create(file=fh, purpose="assistants")
-
-
 # 1. Create a vector store and index every policy file into it
 vector_store = retry_not_found(
     lambda: openai_client.vector_stores.create(name="northfield-policies")
 )
 for policy_file in sorted(POLICY_DIR.glob("*.md")):
-    uploaded = retry_not_found(lambda: upload(policy_file))
+    # A path, not an open file: the SDK reads it to bytes it can resend on a retry.
+    uploaded = retry_not_found(lambda: openai_client.files.create(
+        file=policy_file, purpose="assistants",
+    ))
     retry_not_found(lambda: openai_client.vector_stores.files.create(
         vector_store_id=vector_store.id, file_id=uploaded.id,
     ))

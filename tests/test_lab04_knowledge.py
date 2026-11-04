@@ -32,12 +32,16 @@ def not_found():
     )
 
 
+def timed_out():
+    return openai.APITimeoutError(request=httpx.Request("POST", "https://example.test"))
+
+
 def completed():
     return types.SimpleNamespace(status="completed", last_error=None)
 
 
-def make_fail_once(client, path):
-    """The call at path (e.g. "files.create") raises 404 once, then works."""
+def make_fail_once(client, path, error=not_found):
+    """The call at path (e.g. "files.create") raises error once, then works."""
     mock = client
     for part in path.split("."):
         mock = getattr(mock, part)
@@ -47,7 +51,7 @@ def make_fail_once(client, path):
     def effect(*args, **kwargs):
         seen.append(1)
         if len(seen) == 1:
-            raise not_found()
+            raise error()
         return then(*args, **kwargs) if then else DEFAULT
 
     mock.side_effect = effect
@@ -57,14 +61,15 @@ def make_fail_once(client, path):
 def run_lab04(monkeypatch):
     """Run lab04 with every Azure dependency mocked, so there is no network."""
 
-    def run(retrieve_side_effect=None, attach_side_effect=None, fail_once=None):
+    def run(retrieve_side_effect=None, attach_side_effect=None, fail_once=None,
+            fail_with=not_found):
         openai_client = MagicMock(name="openai_client")
         openai_client.vector_stores.create.return_value.id = "vs-test"
         files = openai_client.vector_stores.files
         files.retrieve.side_effect = retrieve_side_effect or (lambda *a, **k: completed())
         files.create.side_effect = attach_side_effect
         if fail_once:
-            make_fail_once(openai_client, fail_once)
+            make_fail_once(openai_client, fail_once, fail_with)
         project = MagicMock(name="project")
         project.get_openai_client.return_value = openai_client
 
@@ -165,6 +170,23 @@ def test_poll_always_not_found_raises_after_6_tries(run_lab04):
 def test_every_file_and_vector_store_call_retries_404(run_lab04, call):
     lab = run_lab04(fail_once=call)
     assert lab.project.agents.create_version.called
+
+
+def test_timed_out_upload_is_retried(run_lab04):
+    lab = run_lab04(fail_once="files.create", fail_with=timed_out)
+    assert lab.openai_client.files.create.call_count == 4  # 1 timeout, then 3 files
+    assert lab.project.agents.create_version.called
+
+
+def test_upload_sends_the_path_so_the_sdk_can_resend_it(lab04):
+    for call in lab04.openai_client.files.create.call_args_list:
+        assert isinstance(call.kwargs["file"], Path)
+
+
+def test_client_has_a_bounded_timeout_and_retries(lab04):
+    kwargs = lab04.project.get_openai_client.call_args.kwargs
+    assert kwargs["timeout"] == 60
+    assert kwargs["max_retries"] == 3
 
 
 def test_not_found_on_attach_is_retried(run_lab04):
