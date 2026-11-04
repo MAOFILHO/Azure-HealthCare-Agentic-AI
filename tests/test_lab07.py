@@ -3,8 +3,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import openai
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+import lab07_cleanup
 from lab07_cleanup import cleanup
 from lab07_mcp import create_agent, learn_tool
 
@@ -144,3 +147,39 @@ def test_lab07_hides_only_the_mcp_ping_deprecation_warning():
     assert [str(w.message) for w in caught] == [
         "The logging capability is deprecated as of 2026-07-28."
     ]
+
+
+def not_found():
+    response = MagicMock(status_code=404, headers={})
+    return openai.NotFoundError("Subdomain does not map to a resource", response=response, body=None)
+
+
+def test_cleanup_retries_a_transient_404_on_vector_store_delete(monkeypatch):
+    monkeypatch.setattr(lab07_cleanup.time, "sleep", MagicMock())
+    project, openai_client = fake_clients([], [("vs_1", "northfield-policies")])
+    openai_client.vector_stores.delete.side_effect = [not_found(), not_found(), None]
+
+    cleanup(project, openai_client)
+
+    assert openai_client.vector_stores.delete.call_count == 3
+
+
+def test_cleanup_warns_and_still_deletes_the_agent_on_a_permanent_404(monkeypatch, capsys):
+    sleep = MagicMock()
+    monkeypatch.setattr(lab07_cleanup.time, "sleep", sleep)
+    project, openai_client = fake_clients(
+        ["carecompanion-agent"],
+        [("vs_1", "northfield-policies"), ("vs_2", "northfield-policies")],
+    )
+    openai_client.vector_stores.delete.side_effect = lambda vector_store_id: (
+        (_ for _ in ()).throw(not_found()) if vector_store_id == "vs_1" else None
+    )
+
+    cleanup(project, openai_client)
+
+    out = capsys.readouterr().out
+    warnings = [line for line in out.splitlines() if "vs_1" in line and "warn" in line.lower()]
+    assert len(warnings) == 1
+    assert openai_client.vector_stores.delete.call_count == 5 + 1
+    sleep.assert_called_with(3)
+    project.agents.delete.assert_called_once_with("carecompanion-agent")
