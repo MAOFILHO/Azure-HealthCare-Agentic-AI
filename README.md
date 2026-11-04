@@ -34,49 +34,56 @@ Source: [docs/Architecture_Overview.pdf](docs/Architecture_Overview.pdf).
 Lab 6 runs two multi-agent patterns. In the care team (`src/lab06_care_team.py`), the coordinator calls each specialist as a tool, and only the specialists touch the hospital data. In the pipeline (`src/lab06_pipeline.py`), two agents run in a fixed order and each one passes its output to the next.
 
 ```mermaid
-flowchart TD
-    caller([Caller request]) --> coord
+flowchart LR
+    caller([Caller]) <--> coord
 
-    subgraph care["Care team: orchestrator and sub-agents (lab06_care_team.py)"]
-        coord["CareCoordinator<br/>orchestrator, no data tools"]
+    subgraph care["Care team (lab06_care_team.py)"]
+        coord["CareCoordinator<br/>orchestrator"]
         records["RecordsSpecialist<br/>sub-agent"]
         sched["SchedulingSpecialist<br/>sub-agent"]
-        coord -- "records_specialist(name)" --> records
-        records -- "patient record" --> coord
-        coord -- "scheduling_specialist(patient ID)" --> sched
-        sched -- "appointments or booking" --> coord
+        coord <-- "records_specialist tool" --> records
+        coord <-- "scheduling_specialist tool" --> sched
     end
 
-    subgraph tools["hospital_tools.py"]
-        find["find_patient"]
-        getappt["get_appointments"]
-        book["book_appointment"]
-    end
-
-    records --> find
-    sched --> getappt
-    sched --> book
+    records --> find["find_patient"]
+    sched --> getappt["get_appointments"]
+    sched --> book["book_appointment"]
     find --> patients[("patients.json")]
     getappt --> appts[("appointments.json")]
     book --> appts
-
-    coord -- "one complete answer" --> caller
-
-    subgraph pipe["Pipeline: sequential workflow (lab06_pipeline.py)"]
-        note[("discharge_note.md")] --> extractor["NoteExtractor<br/>facts as bullets"]
-        extractor -- "extracted facts" --> writer["PatientWriter<br/>plain-language rewrite"]
-        writer --> summary(["After-visit summary"])
-    end
-
-    model{{"Foundry model deployment"}}
-    coord -.-> model
-    records -.-> model
-    sched -.-> model
-    extractor -.-> model
-    writer -.-> model
 ```
 
-Solid arrows are calls and data. Dotted arrows are model calls: every agent uses the same Foundry chat deployment through `FoundryChatClient`.
+How the agents talk, for the Lab 6 demo request:
+
+```mermaid
+sequenceDiagram
+    actor Caller
+    participant C as CareCoordinator
+    participant R as RecordsSpecialist
+    participant S as SchedulingSpecialist
+    Caller->>C: Book Maria Rivera's cardiology follow-up if missing
+    C->>R: records_specialist("Maria Rivera")
+    R->>R: find_patient tool
+    R-->>C: patient record and ID
+    C->>S: scheduling_specialist(patient ID)
+    S->>S: get_appointments tool
+    alt no cardiology follow-up
+        S->>S: book_appointment tool
+    end
+    S-->>C: appointments or new booking
+    C-->>Caller: one complete answer
+```
+
+The pipeline needs no orchestrator. Each agent hands its output to the next:
+
+```mermaid
+flowchart LR
+    note[("discharge_note.md")] --> extractor["NoteExtractor<br/>facts as bullets"]
+    extractor -- "extracted facts" --> writer["PatientWriter<br/>plain-language rewrite"]
+    writer --> summary(["After-visit summary"])
+```
+
+Every agent calls the same Foundry chat deployment through `FoundryChatClient`. Specialists answer only through the coordinator. They never reply to the caller directly.
 
 ### Resources
 
