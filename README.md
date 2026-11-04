@@ -158,26 +158,82 @@ Expected from the deploy: `Deployed. Wrote 3 variables to the env file (values n
 
 Each lab calls the live Foundry project. The Foundry service sometimes answers `404 Subdomain does not map to a resource` for a few seconds. Lab 4 and the cleanup script retry on their own. For any other lab, wait a minute and run it again.
 
-| Lab | Command | You should see |
-|---|---|---|
-| 1 | `python src/lab01_chat.py` | A two-sentence description of a hospital care coordinator |
-| 2a | `python src/lab02_create_agent.py` | `Agent 'carecompanion-agent' is now at version 1` (the number rises on a re-run) |
-| 2b | `python src/lab02_chat.py` | A `You:` prompt. Ask "What are the visiting hours?", then type `quit` |
-| 3 | `python src/lab03_tools.py` | A `You:` prompt. Ask about Maria Rivera's appointments, then ask to book a lab draw, then type `quit` |
-| 4 | `python src/lab04_knowledge.py` | One `Indexed <file>` line per policy file, then an ICU visiting-hours answer from the policy files |
-| 5a | `python src/lab05_extract.py` | The discharge note saved to `data/discharge_note.md`, first lines printed |
-| 5b | `python src/lab05_structured.py` | A JSON record with diagnosis, medications, follow-up and warning signs |
-| 6a | `python src/lab06_care_team.py` | The coordinator reports Maria Rivera already has a cardiology follow-up, so no new booking |
-| 6b | `python src/lab06_pipeline.py` | A plain-language after-visit summary that ends with the hospital contact number |
-| 7 | `python src/lab07_mcp.py` | The Microsoft Learn tools are listed, then an answer about the Foundry project endpoint |
+Lab 2b needs Lab 2a first, because it chats with the agent that 2a creates. Run the labs in the order below. Your wording will differ from the screenshots, because the model writes the text.
 
-Notes:
+#### Lab 1: first model call
 
-- Lab 2b needs Lab 2a first, because it chats with the agent that 2a creates.
-- Lab 4 creates a new version of `carecompanion-agent` with file search attached, so run it after Lab 2a to keep the version history in order.
-- Lab 3 booking is a mock. It saves nothing.
-- Lab 5a rewrites `data/discharge_note.md`. Run `git restore data/discharge_note.md` if you do not want that change in your working tree.
-- Optional tracing for Lab 3: set `ENABLE_CONSOLE_EXPORTERS=true` before the command. Spans print to the terminal. Nothing goes to Azure.
+```bash
+python src/lab01_chat.py
+```
+
+You should see a two-sentence description of a hospital care coordinator.
+
+![Lab 1 output](docs/screenshots/Lab1.png)
+
+#### Lab 2: create the agent, then chat
+
+```bash
+python src/lab02_create_agent.py
+python src/lab02_chat.py
+```
+
+The first command prints `Agent 'carecompanion-agent' is now at version 1`. The number rises on a re-run. The second opens a `You:` prompt. Ask "What are the visiting hours?", then "My mother is in the hospital and I want to see her tomorrow.", then type `quit`.
+
+![Lab 2 output](docs/screenshots/Lab2.png)
+
+#### Lab 3: function calling
+
+```bash
+python src/lab03_tools.py
+```
+
+At the `You:` prompt, ask "Find Maria Rivera's upcoming appointments", then "Book a lab draw for July 24", then type `quit`. Booking is a mock and saves nothing.
+
+Optional tracing: set `ENABLE_CONSOLE_EXPORTERS=true` before the command. Spans print to the terminal. Nothing goes to Azure.
+
+![Lab 3 output](docs/screenshots/Lab3.png)
+
+#### Lab 4: grounded answers from hospital policy
+
+```bash
+python src/lab04_knowledge.py
+```
+
+You should see one `Indexed <file>` line per policy file, the agent at a new version with file search attached, then an ICU visiting-hours answer drawn from the policy files. Your version number will differ.
+
+![Lab 4 output](docs/screenshots/Lab4.png)
+
+#### Lab 5: discharge note
+
+```bash
+python src/lab05_extract.py
+python src/lab05_structured.py
+```
+
+The first command saves the extracted Markdown to `data/discharge_note.md` and prints the first lines. The second prints a JSON record with diagnosis, medications, follow-up plan and warning signs. `lab05_extract.py` rewrites `data/discharge_note.md`. Run `git restore data/discharge_note.md` if you do not want that change in your working tree.
+
+![Lab 5 output](docs/screenshots/Lab5.png)
+
+#### Lab 6: multi-agent workflows
+
+```bash
+python src/lab06_care_team.py
+python src/lab06_pipeline.py
+```
+
+The first shows the coordinator checking the records and scheduling agents. It finds the existing cardiology follow-up for Maria Rivera. The second prints a plain-language after-visit summary that ends with the hospital contact number.
+
+![Lab 6 output](docs/screenshots/Lab6.png)
+
+#### Lab 7: MCP
+
+```bash
+python src/lab07_mcp.py
+```
+
+You should see an answer about the Foundry project endpoint, with a Microsoft Learn source. The lower half of the screenshot is Step 3 below.
+
+![Lab 7 output](docs/screenshots/Lab7.png)
 
 ### Step 3: Clean up the lab objects
 
