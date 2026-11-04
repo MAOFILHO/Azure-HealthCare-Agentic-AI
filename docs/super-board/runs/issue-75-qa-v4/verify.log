@@ -1,0 +1,13 @@
++(eval):1> python3 -m compileall -q src
++(eval):1> echo compileall-ok
+compileall-ok
++(eval):1> PY=<repo>/.venv/bin/python 
++(eval):1> <repo>/.venv/bin/python -m pytest -q
++(eval):1> tail -3
+........................................................................ [ 68%]
+.................................                                        [100%]
+105 passed in 13.48s
++(eval):1> az bicep build --file infra/main.bicep --stdout
+WARNING: A new Bicep release is available: v0.48.1. Upgrade now by running "az bicep upgrade".
++(eval):1> echo bicep-ok
+bicep-ok

@@ -1,0 +1,9 @@
+run2 exit=1
+Indexed billing_faq.md
+  File "<repo>/.claude/worktrees/issue-75-qa/src/lab04_knowledge.py", line 73, in <module>
+openai.NotFoundError: Error code: 404 - Subdomain does not map to a resource.
+run3 exit=1
+Indexed billing_faq.md
+Indexed discharge_process.md
+  File "<repo>/.claude/worktrees/issue-75-qa/src/lab04_knowledge.py", line 73, in <module>
+openai.NotFoundError: Error code: 404 - vector store with id '<redacted>' not found.

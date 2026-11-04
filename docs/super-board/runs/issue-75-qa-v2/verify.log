@@ -1,0 +1,7 @@
+$ python3 -m compileall -q src
+exit=0
+$ .venv/bin/python -m pytest -q
+97 passed in 13.24s
+exit=0
+$ az bicep build --file infra/main.bicep --stdout > /dev/null
+exit=0
