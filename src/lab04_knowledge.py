@@ -56,10 +56,10 @@ agent = project.agents.create_version(
 print(f"{agent.name} is now version {agent.version} (file search attached)")
 
 # 3. Ask a question only the documents can answer
-chat = project.get_openai_client(agent_name="carecompanion-agent")
-conversation = chat.conversations.create()
-response = chat.responses.create(
+conversation = openai_client.conversations.create()
+response = openai_client.responses.create(
     conversation=conversation.id,
     input="Can my brother visit me in the ICU at 9 pm tonight?",
+    extra_body={"agent_reference": {"name": "carecompanion-agent", "type": "agent_reference"}},
 )
 print("\n" + response.output_text)
