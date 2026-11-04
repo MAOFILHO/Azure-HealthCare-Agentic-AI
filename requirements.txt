@@ -1,6 +1,6 @@
-azure-ai-projects>=2.0.0
+azure-ai-projects==2.7.0
 azure-identity>=1.19.0
-openai>=1.60.0
+openai==3.42.0
 python-dotenv>=1.0.1
 agent-framework-core>=1.0.0
 agent-framework-foundry
