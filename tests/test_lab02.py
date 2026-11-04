@@ -28,6 +28,7 @@ class FakeOpenAI:
 
     def __init__(self):
         self.histories = {}
+        self.extra_bodies = []
         self.conversations = SimpleNamespace(create=self._create)
         self.responses = SimpleNamespace(create=self._respond)
 
@@ -35,7 +36,8 @@ class FakeOpenAI:
         self.histories["conv-1"] = []
         return SimpleNamespace(id="conv-1")
 
-    def _respond(self, conversation, input):
+    def _respond(self, conversation, input, extra_body=None):
+        self.extra_bodies.append(extra_body)
         history = self.histories[conversation]
         seen = list(history)
         history.append(input)
@@ -64,3 +66,12 @@ def test_quit_ends_chat_without_calling_the_agent():
     run_chat(client, ["QUIT"])
 
     assert client.histories["conv-1"] == []
+
+
+def test_every_response_targets_the_agent_via_agent_reference():
+    client = FakeOpenAI()
+
+    run_chat(client, ["hello", "again", "quit"])
+
+    expected = {"agent_reference": {"name": "carecompanion-agent", "type": "agent_reference"}}
+    assert client.extra_bodies == [expected, expected]
